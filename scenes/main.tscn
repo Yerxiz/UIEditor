@@ -1,0 +1,90 @@
+[gd_scene format=3 uid="uid://crws7leunmsx"]
+
+[node name="Main" type="Control" unique_id=508790409]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+
+[node name="MainLayout" type="HSplitContainer" parent="." unique_id=1593542805]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 6
+split_offsets = PackedInt32Array(-214, 279)
+split_offset = -214
+
+[node name="VSplitContainer" type="VSplitContainer" parent="MainLayout" unique_id=2031671785]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Hierarchy" type="Tree" parent="MainLayout/VSplitContainer" unique_id=2128353730]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="Toolbar" type="VBoxContainer" parent="MainLayout/VSplitContainer" unique_id=124793156]
+custom_minimum_size = Vector2(100, 50)
+layout_mode = 2
+
+[node name="AddButton" type="Button" parent="MainLayout/VSplitContainer/Toolbar" unique_id=231400005]
+layout_mode = 2
+text = "Добавить кнопку"
+
+[node name="AddLabel" type="Button" parent="MainLayout/VSplitContainer/Toolbar" unique_id=1255336650]
+layout_mode = 2
+text = "Добавить текст"
+
+[node name="SaveBtn" type="Button" parent="MainLayout/VSplitContainer/Toolbar" unique_id=382321687]
+layout_mode = 2
+text = "Сохранить"
+
+[node name="ClearBtn" type="Button" parent="MainLayout/VSplitContainer/Toolbar" unique_id=841245377]
+layout_mode = 2
+text = "Очистить"
+
+[node name="CanvasArea" type="Control" parent="MainLayout" unique_id=309392348]
+clip_contents = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ColorRect" type="ColorRect" parent="MainLayout/CanvasArea" unique_id=927890836]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Inspector" type="VBoxContainer" parent="MainLayout" unique_id=482121721]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="Inspector" type="Label" parent="MainLayout/Inspector" unique_id=1840557149]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Inspector"
+horizontal_alignment = 1
+
+[node name="PropName" type="LineEdit" parent="MainLayout/Inspector" unique_id=1846775538]
+layout_mode = 2
+
+[node name="PropX" type="SpinBox" parent="MainLayout/Inspector" unique_id=1725178879]
+layout_mode = 2
+
+[node name="PropY" type="SpinBox" parent="MainLayout/Inspector" unique_id=103941477]
+layout_mode = 2
+
+[node name="PropText" type="LineEdit" parent="MainLayout/Inspector" unique_id=534099670]
+layout_mode = 2
