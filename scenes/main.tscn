@@ -240,9 +240,11 @@ layout_mode = 2
 size_flags_horizontal = 3
 color = Color(1, 1, 1, 1)
 
+[node name="SaveFileDialog" type="FileDialog" parent="." unique_id=1917440491]
+oversampling_override = 1.0
+title = "Save project"
+access = 2
+filters = PackedStringArray("*.json; JSON Файлы")
+
 [connection signal="dragged" from="MainLayout" to="." method="_on_main_layout_dragged"]
 [connection signal="item_selected" from="MainLayout/HaT_PanelContainer/VSplitContainer/Hierarchy" to="." method="_on_hierarchy_item_selected"]
-[connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddButton" to="." method="_on_add_element" binds= ["button"]]
-[connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddLabel" to="." method="_on_add_element" binds= ["label"]]
-[connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddColorRect" to="." method="_on_add_element" binds= ["color_rect"]]
-[connection signal="button_up" from="MainLayout/Inspector_PanelContainer/Inspector/DeleteButton" to="." method="_on_delete_button_button_up"]

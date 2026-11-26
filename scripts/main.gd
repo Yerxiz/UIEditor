@@ -5,7 +5,16 @@ extends Control
 @onready var canvas = $MainLayout/Canvas_SubViewportContainer/Canvas_SubViewport/CanvasRoot
 @onready var inspector = $MainLayout/Inspector_PanelContainer/Inspector
 
+# Ссылки на элементы в Toolbar
+@onready var add_button_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddButton
+@onready var add_label_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddLabel
+@onready var add_color_rect_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddColorRect
+@onready var save_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/SaveBtn
+@onready var clear_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/ClearBtn
+
 # Ссылки на элементы в Инспекторе
+@onready var delete_btn = $MainLayout/Inspector_PanelContainer/Inspector/DeleteButton
+
 @onready var prop_name_hboxcont = $MainLayout/Inspector_PanelContainer/Inspector/PropName_HBoxContainer
 @onready var prop_name_edit = $MainLayout/Inspector_PanelContainer/Inspector/PropName_HBoxContainer/PropName_LineEdit
 
@@ -30,6 +39,9 @@ extends Control
 @onready var prop_color_hboxcont = $MainLayout/Inspector_PanelContainer/Inspector/PropColor_HBoxContainer
 @onready var prop_color_picker = $MainLayout/Inspector_PanelContainer/Inspector/PropColor_HBoxContainer/PropColor_ColorPickerBtn
 
+# Ссылка на FileDialog
+@onready var save_file_dialog = $SaveFileDialog
+
 var element_counter : int = 0
 var selected_element : Control = null:
 	set(value):
@@ -44,8 +56,14 @@ var inspector_props : Array
 
 
 func _ready() -> void:
-	var add_button = toolbar.get_node("AddButton")
-	var add_label = toolbar.get_node("AddLabel")
+	add_button_btn.button_up.connect(_on_add_element.bind("button"))
+	add_label_btn.button_up.connect(_on_add_element.bind("label"))
+	add_color_rect_btn.button_up.connect(_on_add_element.bind("color_rect"))
+	
+	save_btn.button_up.connect(_on_save_button_pressed)
+	save_file_dialog.file_selected.connect(_on_file_selected)
+	
+	delete_btn.button_up.connect(_on_delete_button_button_up)
 	
 	prop_name_hboxcont.hide()
 	prop_anchor_hboxcont.hide()
@@ -291,3 +309,71 @@ func _on_delete_button_button_up() -> void:
 			prop_color_hboxcont.hide()
 			
 		_update_hierarchy()
+		
+func _on_save_button_pressed() -> void:
+	save_file_dialog.popup_centered()
+	
+func _on_file_selected(path: String) -> void:
+	if not path.ends_with(".json"):
+		path += ".json"
+		
+	# 1. Базовую структура JSON
+	var export_data = {
+		"format_version": "1.0",
+		"engine_target": "Universal",
+		"canvas": {
+			"width": 1920,
+			"height": 1080
+		},
+		"elements": []
+	}
+	
+	# 2. Проходим по всем элементам на холсте и собираем их данные
+	for el in elements:
+		if is_instance_valid(el):
+			var el_data = elements[el]
+			
+			# Словарь для конкретного элемента
+			var json_element = {
+				"id": el_data["name"],
+				"type": el_data["type"],
+				"transform": {
+					"x": roundi(el_data["position"].x),
+					"y": roundi(el_data["position"].y),
+					"width": roundi(el_data["size"].x),
+					"height": roundi(el_data["size"].y),
+					"rotation": el_data["rotation"]
+				},
+				"anchor_preset": el_data["anchor_preset"],
+				"properties": {}
+			}
+			
+			if el_data["type"] == "button" or el_data["type"] == "label":
+				json_element["properties"]["text"] = el_data["text"]
+			elif el_data["type"] == "color_rect":
+				json_element["properties"]["color_hex"] = "#" + el_data["color"].to_html()
+				
+			export_data["elements"].append(json_element)
+			
+	# 3. Превращаем словарь в строку JSON с отступами
+	var json_string = JSON.stringify(export_data, "\t", false)
+	
+	# 4. Записываем в файл
+	var file = FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(json_string)
+		file.close()
+		print("Проект успешно сохранен: ", path)
+		_show_success_dialog("Проект успешно сохранен в JSON.")
+	else:
+		print("Ошибка при сохранении файла.")
+
+
+func _show_success_dialog(message: String) -> void:
+	var dialog = AcceptDialog.new()
+	dialog.dialog_text = message
+	dialog.title = "Save is success"
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)
