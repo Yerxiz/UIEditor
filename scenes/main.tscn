@@ -241,6 +241,7 @@ size_flags_horizontal = 3
 color = Color(1, 1, 1, 1)
 
 [connection signal="dragged" from="MainLayout" to="." method="_on_main_layout_dragged"]
+[connection signal="item_selected" from="MainLayout/HaT_PanelContainer/VSplitContainer/Hierarchy" to="." method="_on_hierarchy_item_selected"]
 [connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddButton" to="." method="_on_add_element" binds= ["button"]]
 [connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddLabel" to="." method="_on_add_element" binds= ["label"]]
 [connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddColorRect" to="." method="_on_add_element" binds= ["color_rect"]]

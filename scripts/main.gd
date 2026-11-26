@@ -79,13 +79,16 @@ func _on_add_element(type : String) -> void:
 	if type == "button":
 		new_element = Button.new()
 		new_element.text = "Button_" + str(ind)
+		new_element.name = new_element.text
 		
 	elif type == "label":
 		new_element = Label.new()
 		new_element.text = "Text_" + str(ind)
+		new_element.name = new_element.text
 		new_element.mouse_filter = Control.MOUSE_FILTER_PASS
 	elif type == "color_rect":
 		new_element = ColorRect.new()
+		new_element.name = "ColorRect_" + str(ind)
 		new_element.size = Vector2(40.0, 40.0)
 		
 	new_element.set_script(load("res://scripts/DraggableElement.gd"))
@@ -96,7 +99,6 @@ func _on_add_element(type : String) -> void:
 	new_element.anchor_top = 0.0
 	new_element.position = Vector2(canvas.size.x / 2.0, canvas.size.y / 2.0)
 	
-	new_element.name = type + str(element_counter)
 	element_counter += 1
 	
 	canvas.add_child(new_element)
@@ -160,6 +162,11 @@ func _on_anchor_preset_selected(index : int) -> void:
 func _on_element_selected(element : Control) -> void:
 	selected_element = element
 	print(elements[selected_element])
+	
+	for item in hierarchy.get_root().get_children():
+		if item.get_metadata(0) == element:
+			item.select(0)
+			break
 
 
 func _on_element_dragged(element : Control) -> void:
@@ -169,10 +176,6 @@ func _on_element_dragged(element : Control) -> void:
 		prop_y_spinbox.value = element.position.y
 		_set_block_inspector_props_signals(false)
 		elements[element]["position"] = element.position
-
-
-func _update_hierarchy() -> void:
-	pass
 
 
 func _update_inspector() -> void:
@@ -212,6 +215,27 @@ func _update_inspector() -> void:
 	_set_block_inspector_props_signals(false)
 
 
+func _update_hierarchy() -> void:
+	hierarchy.clear()
+	var root = hierarchy.create_item()
+	root.set_text(0, "Canvas")
+	
+	for el in elements:
+		if is_instance_valid(el):
+			var item = hierarchy.create_item(root)
+			item.set_text(0, el.name)
+			item.set_metadata(0, el)
+
+
+func _on_hierarchy_item_selected() -> void:
+	var selected_item = hierarchy.get_selected()
+	if selected_item:
+		var el = selected_item.get_metadata(0)
+		if el and is_instance_valid(el):
+			selected_element = el
+			el.move_to_front()
+
+
 func _on_inspector_changed(_value = null) -> void:
 	if not selected_element: return
 	
@@ -237,6 +261,7 @@ func _on_inspector_changed(_value = null) -> void:
 		selected_element.color = prop_color_picker.color
 		data["color"] = prop_color_picker.color
 		
+	_update_hierarchy()
 
 
 func _set_block_inspector_props_signals(value : bool) -> void:
@@ -264,3 +289,5 @@ func _on_delete_button_button_up() -> void:
 			prop_height_hboxcont.hide()
 			prop_text_hboxcont.hide()
 			prop_color_hboxcont.hide()
+			
+		_update_hierarchy()
