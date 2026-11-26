@@ -28,8 +28,8 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
-split_offsets = PackedInt32Array(-340, 370)
-split_offset = -340
+split_offsets = PackedInt32Array(-330, 370)
+split_offset = -330
 
 [node name="HaT_PanelContainer" type="PanelContainer" parent="MainLayout" unique_id=186250426]
 custom_minimum_size = Vector2(100, 0)
@@ -71,7 +71,6 @@ layout_mode = 2
 text = "Очистить"
 
 [node name="Canvas_SubViewportContainer" type="SubViewportContainer" parent="MainLayout" unique_id=937435539]
-clip_contents = true
 layout_mode = 2
 stretch = true
 script = ExtResource("2_sugp2")
@@ -79,7 +78,7 @@ script = ExtResource("2_sugp2")
 [node name="Canvas_SubViewport" type="SubViewport" parent="MainLayout/Canvas_SubViewportContainer" unique_id=1211499962]
 transparent_bg = true
 handle_input_locally = false
-size = Vector2i(708, 648)
+size = Vector2i(698, 648)
 render_target_update_mode = 4
 
 [node name="CanvasRoot" type="Control" parent="MainLayout/Canvas_SubViewportContainer/Canvas_SubViewport" unique_id=1230092049]
@@ -141,41 +140,105 @@ text = "Name"
 layout_mode = 2
 size_flags_horizontal = 3
 
-[node name="PropX_HBoxContainer2" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=365773799]
+[node name="PropAnchor_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=2119810309]
 layout_mode = 2
 
-[node name="PropX_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropX_HBoxContainer2" unique_id=864074786]
+[node name="PropAnchor_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropAnchor_HBoxContainer" unique_id=93281257]
+layout_mode = 2
+size_flags_horizontal = 2
+text = "Anchor"
+
+[node name="PropAnchor_OptionButton" type="OptionButton" parent="MainLayout/Inspector_PanelContainer/Inspector/PropAnchor_HBoxContainer" unique_id=1671214008]
+layout_mode = 2
+size_flags_horizontal = 3
+item_count = 2
+popup/item_0/text = "Left"
+popup/item_0/id = 0
+popup/item_1/text = "Center"
+popup/item_1/id = 1
+
+[node name="PropX_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=365773799]
+layout_mode = 2
+
+[node name="PropX_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropX_HBoxContainer" unique_id=864074786]
 layout_mode = 2
 size_flags_horizontal = 2
 text = "X"
 
-[node name="PropX_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropX_HBoxContainer2" unique_id=1725178879]
+[node name="PropX_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropX_HBoxContainer" unique_id=1725178879]
 layout_mode = 2
 size_flags_horizontal = 3
+min_value = -2000.0
+max_value = 4000.0
 
-[node name="PropY_HBoxContainer3" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1093022052]
+[node name="PropY_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1093022052]
 layout_mode = 2
 
-[node name="PropY_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropY_HBoxContainer3" unique_id=616669641]
+[node name="PropY_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropY_HBoxContainer" unique_id=616669641]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Y"
 
-[node name="PropY_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropY_HBoxContainer3" unique_id=103941477]
+[node name="PropY_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropY_HBoxContainer" unique_id=103941477]
 layout_mode = 2
 size_flags_horizontal = 3
+min_value = -2000.0
+max_value = 4000.0
 
-[node name="PropText_HBoxContainer4" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1539503382]
+[node name="PropWidth_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1745699777]
 layout_mode = 2
 
-[node name="PropText_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer4" unique_id=1443312056]
+[node name="PropWidth_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropWidth_HBoxContainer" unique_id=1598477120]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Width"
+
+[node name="PropWidth_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropWidth_HBoxContainer" unique_id=687553739]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 4000.0
+value = 10.0
+
+[node name="PropHeight_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1900354540]
+layout_mode = 2
+
+[node name="PropHeight_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropHeight_HBoxContainer" unique_id=257940466]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Height"
+
+[node name="PropHeight_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropHeight_HBoxContainer" unique_id=1986275483]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 4000.0
+value = 10.0
+
+[node name="PropText_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1539503382]
+layout_mode = 2
+
+[node name="PropText_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer" unique_id=1443312056]
 layout_mode = 2
 size_flags_horizontal = 3
 text = "Text"
 
-[node name="PropText_LineEdit" type="LineEdit" parent="MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer4" unique_id=534099670]
+[node name="PropText_LineEdit" type="LineEdit" parent="MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer" unique_id=534099670]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="PropColor_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1980109188]
+layout_mode = 2
+
+[node name="PropColor_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropColor_HBoxContainer" unique_id=1066366493]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Color"
+
+[node name="PropColor_ColorPickerBtn" type="ColorPickerButton" parent="MainLayout/Inspector_PanelContainer/Inspector/PropColor_HBoxContainer" unique_id=1157168314]
+layout_mode = 2
+size_flags_horizontal = 3
+color = Color(1, 1, 1, 1)
 
 [connection signal="dragged" from="MainLayout" to="." method="_on_main_layout_dragged"]
 [connection signal="button_up" from="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddButton" to="." method="_on_add_element" binds= ["button"]]
