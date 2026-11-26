@@ -83,6 +83,8 @@ func _ready() -> void:
 	prop_color_picker.color_changed.connect(_on_inspector_changed)
 	
 	prop_anchor_option.item_selected.connect(_on_anchor_preset_selected)
+	
+	hierarchy.set_drag_forwarding(_get_drag_data_fw, _can_drop_data_fw, _drop_data_fw)
 
 
 func _on_add_element(type : String) -> void:
@@ -238,8 +240,11 @@ func _update_hierarchy() -> void:
 	var root = hierarchy.create_item()
 	root.set_text(0, "Canvas")
 	
-	for el in elements:
-		if is_instance_valid(el):
+	var children = canvas.get_children()
+	children.reverse()
+	
+	for el in children:
+		if is_instance_valid(el) and el is Control and el.name != "Background":
 			var item = hierarchy.create_item(root)
 			item.set_text(0, el.name)
 			item.set_metadata(0, el)
@@ -296,6 +301,7 @@ func _set_block_inspector_props_signals(value : bool) -> void:
 func _on_delete_button_button_up() -> void:
 	if selected_element and elements.has(selected_element):
 		elements.erase(selected_element)
+		canvas.remove_child(selected_element)
 		selected_element.queue_free()
 		
 		if not elements:
@@ -377,3 +383,53 @@ func _show_success_dialog(message: String) -> void:
 	dialog.popup_centered()
 	dialog.confirmed.connect(dialog.queue_free)
 	dialog.canceled.connect(dialog.queue_free)
+	
+	
+func _get_drag_data_fw(at_position: Vector2) -> Variant:
+	var item = hierarchy.get_item_at_position(at_position)
+	if item and item != hierarchy.get_root():
+		var el = item.get_metadata(0)
+		if el and is_instance_valid(el):
+			# Создаем визуальный превью-квадратик, который летит за мышкой
+			var drag_preview = Label.new()
+			drag_preview.text = " " + el.name + " "
+			hierarchy.set_drag_preview(drag_preview)
+			return item
+	return null
+
+# 2. Можно ли сюда бросить?
+func _can_drop_data_fw(at_position: Vector2, data: Variant) -> bool:
+	hierarchy.drop_mode_flags = Tree.DROP_MODE_INBETWEEN
+	if data is TreeItem:
+		var target_item = hierarchy.get_item_at_position(at_position)
+		# Нельзя бросать на корень и на самого себя
+		if target_item and target_item != hierarchy.get_root() and target_item != data:
+			return true
+	return false
+
+# 3. Что происходит, когда мы бросили элемент?
+func _drop_data_fw(at_position: Vector2, data: Variant) -> void:
+	var dragged_item: TreeItem = data
+	var target_item = hierarchy.get_item_at_position(at_position)
+	
+	if target_item and target_item != hierarchy.get_root() and dragged_item != target_item:
+		var dragged_el = dragged_item.get_metadata(0)
+		var target_el = target_item.get_metadata(0)
+		
+		if is_instance_valid(dragged_el) and is_instance_valid(target_el):
+			var dragged_idx = canvas.get_children().find(dragged_el)
+			var target_idx = canvas.get_children().find(target_el)
+			
+			if dragged_idx != -1 and target_idx != -1:
+				# Узнаем, бросили мы ВЫШЕ или НИЖЕ цели
+				var drop_section = hierarchy.get_drop_section_at_position(at_position)
+				
+				# Перемещаем элемент в Canvas, меняя его Z-порядок
+				canvas.move_child(dragged_el, target_idx)
+				
+				# Если бросили ниже цели, нужно сдвинуть индекс еще на 1
+				if drop_section == 1: 
+					canvas.move_child(dragged_el, target_idx + 1)
+					
+				_update_hierarchy()
+				selected_element = dragged_el

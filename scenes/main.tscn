@@ -45,6 +45,7 @@ size_flags_horizontal = 3
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 size_flags_vertical = 3
+drop_mode_flags = 2
 
 [node name="Toolbar" type="VBoxContainer" parent="MainLayout/HaT_PanelContainer/VSplitContainer" unique_id=124793156]
 custom_minimum_size = Vector2(100, 50)
