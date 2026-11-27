@@ -36,6 +36,9 @@ extends Control
 @onready var prop_text_hboxcont = $MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer
 @onready var prop_text_edit = $MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer/PropText_LineEdit
 
+@onready var prop_fontsize_hboxcont = $MainLayout/Inspector_PanelContainer/Inspector/PropFontSize_HBoxContainer
+@onready var prop_fontsize_spinbox = $MainLayout/Inspector_PanelContainer/Inspector/PropFontSize_HBoxContainer/PropFontSize_SpinBox
+
 @onready var prop_color_hboxcont = $MainLayout/Inspector_PanelContainer/Inspector/PropColor_HBoxContainer
 @onready var prop_color_picker = $MainLayout/Inspector_PanelContainer/Inspector/PropColor_HBoxContainer/PropColor_ColorPickerBtn
 
@@ -72,6 +75,7 @@ func _ready() -> void:
 	prop_width_hboxcont.hide()
 	prop_height_hboxcont.hide()
 	prop_text_hboxcont.hide()
+	prop_fontsize_hboxcont.hide()
 	prop_color_hboxcont.hide()
 	
 	prop_name_edit.text_changed.connect(_on_inspector_changed)
@@ -80,6 +84,7 @@ func _ready() -> void:
 	prop_width_spinbox.value_changed.connect(_on_inspector_changed)
 	prop_height_spinbox.value_changed.connect(_on_inspector_changed)
 	prop_text_edit.text_changed.connect(_on_inspector_changed)
+	prop_fontsize_spinbox.value_changed.connect(_on_inspector_changed)
 	prop_color_picker.color_changed.connect(_on_inspector_changed)
 	
 	prop_anchor_option.item_selected.connect(_on_anchor_preset_selected)
@@ -106,6 +111,7 @@ func _on_add_element(type : String) -> void:
 		new_element.text = "Text_" + str(ind)
 		new_element.name = new_element.text
 		new_element.mouse_filter = Control.MOUSE_FILTER_PASS
+		
 	elif type == "color_rect":
 		new_element = ColorRect.new()
 		new_element.name = "ColorRect_" + str(ind)
@@ -143,6 +149,8 @@ func _update_all_elements(new_element : Control, type : String,
 	}
 	if "text" in new_element:
 		data["text"] = new_element.text
+		data["font_size"] = new_element.get_theme_font_size("font_size")
+		data["font_color"] = new_element.get_theme_color("font_color")
 	if "color" in new_element:
 		data["color"] = new_element.color
 		
@@ -210,6 +218,7 @@ func _update_inspector() -> void:
 	prop_y_hboxcont.show()
 	prop_width_hboxcont.show()
 	prop_height_hboxcont.show()
+	prop_color_hboxcont.show()
 	var data = elements[selected_element]
 	
 	_set_block_inspector_props_signals(true)
@@ -225,11 +234,13 @@ func _update_inspector() -> void:
 	
 	if data["type"] in ["button", "label"]:
 		prop_text_hboxcont.show()
-		prop_color_hboxcont.hide()
+		prop_fontsize_hboxcont.show()
 		prop_text_edit.text = data["text"]
+		prop_fontsize_spinbox.value = data["font_size"]
+		prop_color_picker.color = data["font_color"]
 	elif data["type"] == "color_rect":
 		prop_text_hboxcont.hide()
-		prop_color_hboxcont.show()
+		prop_fontsize_hboxcont.hide()
 		prop_color_picker.color = data["color"]
 	
 	_set_block_inspector_props_signals(false)
@@ -278,7 +289,11 @@ func _on_inspector_changed(_value = null) -> void:
 	
 	if data["type"] in ["button", "label"]:
 		selected_element.text = prop_text_edit.text
+		selected_element.add_theme_font_size_override("font_size", prop_fontsize_spinbox.value)
+		selected_element.add_theme_color_override("font_color", prop_color_picker.color)
 		data["text"] = prop_text_edit.text
+		data["font_size"] = prop_fontsize_spinbox.value
+		data["font_color"] = prop_color_picker.color
 		
 	elif data["type"] == "color_rect":
 		selected_element.color = prop_color_picker.color
@@ -295,6 +310,7 @@ func _set_block_inspector_props_signals(value : bool) -> void:
 	prop_width_spinbox.set_block_signals(value)
 	prop_height_spinbox.set_block_signals(value)
 	prop_text_edit.set_block_signals(value)
+	prop_fontsize_spinbox.set_block_signals(value)
 	prop_color_picker.set_block_signals(value)
 
 
@@ -312,6 +328,7 @@ func _on_delete_button_button_up() -> void:
 			prop_width_hboxcont.hide()
 			prop_height_hboxcont.hide()
 			prop_text_hboxcont.hide()
+			prop_fontsize_hboxcont.hide()
 			prop_color_hboxcont.hide()
 			
 		_update_hierarchy()
@@ -356,6 +373,8 @@ func _on_file_selected(path: String) -> void:
 			
 			if el_data["type"] == "button" or el_data["type"] == "label":
 				json_element["properties"]["text"] = el_data["text"]
+				json_element["properties"]["font_size"] = el_data["font_size"]
+				json_element["properties"]["font_color_hex"] = "#" + el_data["font_color"].to_html()
 			elif el_data["type"] == "color_rect":
 				json_element["properties"]["color_hex"] = "#" + el_data["color"].to_html()
 				
@@ -390,24 +409,22 @@ func _get_drag_data_fw(at_position: Vector2) -> Variant:
 	if item and item != hierarchy.get_root():
 		var el = item.get_metadata(0)
 		if el and is_instance_valid(el):
-			# Создаем визуальный превью-квадратик, который летит за мышкой
 			var drag_preview = Label.new()
 			drag_preview.text = " " + el.name + " "
 			hierarchy.set_drag_preview(drag_preview)
 			return item
 	return null
 
-# 2. Можно ли сюда бросить?
+# 2. Можно ли сюда бросить
 func _can_drop_data_fw(at_position: Vector2, data: Variant) -> bool:
 	hierarchy.drop_mode_flags = Tree.DROP_MODE_INBETWEEN
 	if data is TreeItem:
 		var target_item = hierarchy.get_item_at_position(at_position)
-		# Нельзя бросать на корень и на самого себя
 		if target_item and target_item != hierarchy.get_root() and target_item != data:
 			return true
 	return false
 
-# 3. Что происходит, когда мы бросили элемент?
+# 3. Что происходит, когда бросили элемент
 func _drop_data_fw(at_position: Vector2, data: Variant) -> void:
 	var dragged_item: TreeItem = data
 	var target_item = hierarchy.get_item_at_position(at_position)

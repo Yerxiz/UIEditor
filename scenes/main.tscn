@@ -45,7 +45,6 @@ size_flags_horizontal = 3
 custom_minimum_size = Vector2(100, 50)
 layout_mode = 2
 size_flags_vertical = 3
-drop_mode_flags = 2
 
 [node name="Toolbar" type="VBoxContainer" parent="MainLayout/HaT_PanelContainer/VSplitContainer" unique_id=124793156]
 custom_minimum_size = Vector2(100, 50)
@@ -227,6 +226,21 @@ text = "Text"
 [node name="PropText_LineEdit" type="LineEdit" parent="MainLayout/Inspector_PanelContainer/Inspector/PropText_HBoxContainer" unique_id=534099670]
 layout_mode = 2
 size_flags_horizontal = 3
+
+[node name="PropFontSize_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=776957904]
+layout_mode = 2
+
+[node name="PropFontSize_Label" type="Label" parent="MainLayout/Inspector_PanelContainer/Inspector/PropFontSize_HBoxContainer" unique_id=2028514649]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Font Size"
+
+[node name="PropFontSize_SpinBox" type="SpinBox" parent="MainLayout/Inspector_PanelContainer/Inspector/PropFontSize_HBoxContainer" unique_id=667669168]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 10.0
+max_value = 64.0
+value = 10.0
 
 [node name="PropColor_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=1980109188]
 layout_mode = 2
