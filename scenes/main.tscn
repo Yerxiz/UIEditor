@@ -103,6 +103,7 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.6745098, 0.91764706, 0.9411765, 1)
+metadata/Background = true
 
 [node name="Inspector_PanelContainer" type="PanelContainer" parent="MainLayout" unique_id=1849002352]
 custom_minimum_size = Vector2(200, 0)

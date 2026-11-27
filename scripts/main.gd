@@ -66,6 +66,8 @@ func _ready() -> void:
 	save_btn.button_up.connect(_on_save_button_pressed)
 	save_file_dialog.file_selected.connect(_on_file_selected)
 	
+	clear_btn.button_up.connect(_on_clear_button_button_up)
+	
 	delete_btn.button_up.connect(_on_delete_button_button_up)
 	
 	prop_name_hboxcont.hide()
@@ -255,7 +257,7 @@ func _update_hierarchy() -> void:
 	children.reverse()
 	
 	for el in children:
-		if is_instance_valid(el) and el is Control and el.name != "Background":
+		if is_instance_valid(el) and el is Control and not el.has_meta("Background"):
 			var item = hierarchy.create_item(root)
 			item.set_text(0, el.name)
 			item.set_metadata(0, el)
@@ -332,6 +334,29 @@ func _on_delete_button_button_up() -> void:
 			prop_color_hboxcont.hide()
 			
 		_update_hierarchy()
+		
+
+func _on_clear_button_button_up() -> void:
+	for child in canvas.get_children():
+		if not child.has_meta("Background"):
+			canvas.remove_child(child)
+			child.queue_free()
+	elements.clear()
+	
+	if not elements:
+		prop_name_hboxcont.hide()
+		prop_anchor_hboxcont.hide()
+		prop_x_hboxcont.hide()
+		prop_y_hboxcont.hide()
+		prop_width_hboxcont.hide()
+		prop_height_hboxcont.hide()
+		prop_text_hboxcont.hide()
+		prop_fontsize_hboxcont.hide()
+		prop_color_hboxcont.hide()
+	
+	_update_inspector()
+	_update_hierarchy()
+
 		
 func _on_save_button_pressed() -> void:
 	save_file_dialog.popup_centered()
