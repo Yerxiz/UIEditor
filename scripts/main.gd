@@ -193,6 +193,7 @@ func _on_anchor_preset_selected(index : int) -> void:
 	prop_y_spinbox.value = selected_element.position.y
 	_set_block_inspector_props_signals(false)
 	
+	elements[selected_element]["position"] = selected_element.position
 	elements[selected_element]["anchor_preset"] = index
 
 
