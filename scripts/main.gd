@@ -1,5 +1,7 @@
 extends Control
 
+@onready var canvas_viewport_cont = $MainLayout/Canvas_SubViewportContainer
+
 @onready var hierarchy = $MainLayout/HaT_PanelContainer/VSplitContainer/Hierarchy
 @onready var toolbar = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar
 @onready var canvas = $MainLayout/Canvas_SubViewportContainer/Canvas_SubViewport/CanvasRoot
@@ -52,8 +54,14 @@ var selected_element : Control = null:
 	set(value):
 		if selected_element == value:
 			return
+			
+		if is_instance_valid(selected_element):
+			print(1)
+			selected_element.z_index = 0
 		selected_element = value
-		_update_inspector()
+		if selected_element:
+			selected_element.z_index = 1
+			_update_inspector()
 		
 		
 var elements : Dictionary
@@ -96,6 +104,8 @@ func _ready() -> void:
 	prop_anchor_option.item_selected.connect(_on_anchor_preset_selected)
 	
 	hierarchy.set_drag_forwarding(_get_drag_data_fw, _can_drop_data_fw, _drop_data_fw)
+	
+	canvas_viewport_cont.clear_selection.connect(_on_clear_selection)
 
 
 func _on_add_element(type : String) -> void:
@@ -145,7 +155,13 @@ func _on_add_element(type : String) -> void:
 
 func _update_all_elements(new_element : Control, type : String,
 							ind : int) -> void:
-	var prop_name : String = type + "_" + str(ind)
+	var prop_name : String = ""
+	if type == "button":
+		prop_name = "Button_" + str(ind)
+	elif type == "label":
+		prop_name = "Text_" + str(ind)
+	elif type == "color_rect":
+		prop_name = "ColorRect_" + str(ind)
 	
 	var data : Dictionary = {
 		"type": type,
@@ -195,6 +211,22 @@ func _on_anchor_preset_selected(index : int) -> void:
 	
 	elements[selected_element]["position"] = selected_element.position
 	elements[selected_element]["anchor_preset"] = index
+
+
+func _on_clear_selection() -> void:
+	selected_element = null
+	
+	hierarchy.deselect_all()
+	
+	prop_name_hboxcont.hide()
+	prop_anchor_hboxcont.hide()
+	prop_x_hboxcont.hide()
+	prop_y_hboxcont.hide()
+	prop_width_hboxcont.hide()
+	prop_height_hboxcont.hide()
+	prop_text_hboxcont.hide()
+	prop_fontsize_hboxcont.hide()
+	prop_color_hboxcont.hide()
 
 
 func _on_element_selected(element : Control) -> void:
@@ -277,7 +309,7 @@ func _on_hierarchy_item_selected() -> void:
 		var el = selected_item.get_metadata(0)
 		if el and is_instance_valid(el):
 			selected_element = el
-			el.move_to_front()
+			#el.move_to_front()
 
 
 func _on_inspector_changed(_value = null) -> void:

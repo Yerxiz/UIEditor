@@ -7,10 +7,15 @@ extends SubViewportContainer
 var is_panning: bool = false
 var pan_start_mouse: Vector2
 
-# Ссылка на корневой узел холста, чтобы мы могли его двигать и масштабировать
+signal clear_selection
+
 @onready var canvas_root: Control = $Canvas_SubViewport/CanvasRoot
 
 func _gui_input(event: InputEvent) -> void:
+	if event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_LEFT and event.is_pressed():
+			clear_selection.emit()
+	
 	# --- Масштабирование (колесико мыши) ---
 	if event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP:

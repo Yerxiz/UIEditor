@@ -11,7 +11,7 @@ func _gui_input(event: InputEvent) -> void:
 		if event.pressed:
 			is_dragging = true
 			drag_offset = get_global_mouse_position() - global_position
-			move_to_front()
+			#move_to_front()
 			element_clicked.emit(self)
 		else:
 			is_dragging = false
