@@ -9,7 +9,8 @@ extends Control
 @onready var add_button_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddButton
 @onready var add_label_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddLabel
 @onready var add_color_rect_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/AddColorRect
-@onready var save_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/SaveBtn
+@onready var save_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/HBoxContainer/SaveBtn
+@onready var load_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/HBoxContainer/LoadBtn
 @onready var clear_btn = $MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/ClearBtn
 
 # Ссылки на элементы в Инспекторе
@@ -44,6 +45,7 @@ extends Control
 
 # Ссылка на FileDialog
 @onready var save_file_dialog = $SaveFileDialog
+@onready var load_file_dialog = $LoadFileDialog
 
 var element_counter : int = 0
 var selected_element : Control = null:
@@ -65,6 +67,8 @@ func _ready() -> void:
 	
 	save_btn.button_up.connect(_on_save_button_pressed)
 	save_file_dialog.file_selected.connect(_on_file_selected)
+	load_btn.button_up.connect(_on_load_button_pressed)
+	load_file_dialog.file_selected.connect(_on_load_file_selected)
 	
 	clear_btn.button_up.connect(_on_clear_button_button_up)
 	
@@ -125,7 +129,9 @@ func _on_add_element(type : String) -> void:
 	
 	new_element.anchor_left = 0.0
 	new_element.anchor_top = 0.0
-	new_element.position = Vector2(canvas.size.x / 2.0, canvas.size.y / 2.0)
+	new_element.anchor_right = 0.0
+	new_element.anchor_bottom = 0.0
+	new_element.position = (canvas.size - new_element.size) / 2.0
 	
 	element_counter += 1
 	
@@ -144,7 +150,7 @@ func _update_all_elements(new_element : Control, type : String,
 	var data : Dictionary = {
 		"type": type,
 		"name": prop_name,
-		"anchor_preset": prop_anchor_option.selected,
+		"anchor_preset": 0.0,
 		"size": new_element.size,
 		"position": new_element.position,
 		"rotation": new_element.rotation
@@ -162,25 +168,26 @@ func _update_all_elements(new_element : Control, type : String,
 func _on_anchor_preset_selected(index : int) -> void:
 	if not selected_element : return
 	
-	match index:
-		0:	# Top-Left
-			selected_element.anchor_left = 0.0
-			selected_element.anchor_top = 0.0
-			selected_element.anchor_right = 0.0
-			selected_element.anchor_bottom = 0.0
-		1:	# Center
-			selected_element.anchor_left = 0.5
-			selected_element.anchor_top = 0.5
-			selected_element.anchor_right = 0.5
-			selected_element.anchor_bottom = 0.5
-			
-			var width = selected_element.size.x
-			var height = selected_element.size.y
-			selected_element.offset_left = -width / 2.0
-			selected_element.offset_top = -height / 2.0
-			selected_element.offset_right = width / 2.0
-			selected_element.offset_bottom = height / 2.0
-			
+	if index == 0:
+		selected_element.anchor_left = 0.0
+		selected_element.anchor_top = 0.0
+		selected_element.anchor_right = 0.0
+		selected_element.anchor_bottom = 0.0
+	
+	elif index == 1:
+		selected_element.anchor_left = 0.5
+		selected_element.anchor_top = 0.5
+		selected_element.anchor_right = 0.5
+		selected_element.anchor_bottom = 0.5
+		
+		var width = selected_element.size.x
+		var height = selected_element.size.y
+		selected_element.offset_left = -width / 2.0
+		selected_element.offset_top = -height / 2.0
+		selected_element.offset_right = width / 2.0
+		selected_element.offset_bottom = height / 2.0
+	
+	
 	_set_block_inspector_props_signals(true)
 	prop_x_spinbox.value = selected_element.position.x
 	prop_y_spinbox.value = selected_element.position.y
@@ -334,7 +341,7 @@ func _on_delete_button_button_up() -> void:
 			prop_color_hboxcont.hide()
 			
 		_update_hierarchy()
-		
+		selected_element = null
 
 func _on_clear_button_button_up() -> void:
 	for child in canvas.get_children():
@@ -357,78 +364,7 @@ func _on_clear_button_button_up() -> void:
 	_update_inspector()
 	_update_hierarchy()
 
-		
-func _on_save_button_pressed() -> void:
-	save_file_dialog.popup_centered()
-	
-func _on_file_selected(path: String) -> void:
-	if not path.ends_with(".json"):
-		path += ".json"
-		
-	# 1. Базовую структура JSON
-	var export_data = {
-		"format_version": "1.0",
-		"engine_target": "Universal",
-		"canvas": {
-			"width": 1920,
-			"height": 1080
-		},
-		"elements": []
-	}
-	
-	# 2. Проходим по всем элементам на холсте и собираем их данные
-	for el in elements:
-		if is_instance_valid(el):
-			var el_data = elements[el]
-			
-			# Словарь для конкретного элемента
-			var json_element = {
-				"id": el_data["name"],
-				"type": el_data["type"],
-				"transform": {
-					"x": roundi(el_data["position"].x),
-					"y": roundi(el_data["position"].y),
-					"width": roundi(el_data["size"].x),
-					"height": roundi(el_data["size"].y),
-					"rotation": el_data["rotation"]
-				},
-				"anchor_preset": el_data["anchor_preset"],
-				"properties": {}
-			}
-			
-			if el_data["type"] == "button" or el_data["type"] == "label":
-				json_element["properties"]["text"] = el_data["text"]
-				json_element["properties"]["font_size"] = el_data["font_size"]
-				json_element["properties"]["font_color_hex"] = "#" + el_data["font_color"].to_html()
-			elif el_data["type"] == "color_rect":
-				json_element["properties"]["color_hex"] = "#" + el_data["color"].to_html()
-				
-			export_data["elements"].append(json_element)
-			
-	# 3. Превращаем словарь в строку JSON с отступами
-	var json_string = JSON.stringify(export_data, "\t", false)
-	
-	# 4. Записываем в файл
-	var file = FileAccess.open(path, FileAccess.WRITE)
-	if file:
-		file.store_string(json_string)
-		file.close()
-		print("Проект успешно сохранен: ", path)
-		_show_success_dialog("Проект успешно сохранен в JSON.")
-	else:
-		print("Ошибка при сохранении файла.")
 
-
-func _show_success_dialog(message: String) -> void:
-	var dialog = AcceptDialog.new()
-	dialog.dialog_text = message
-	dialog.title = "Save is success"
-	add_child(dialog)
-	dialog.popup_centered()
-	dialog.confirmed.connect(dialog.queue_free)
-	dialog.canceled.connect(dialog.queue_free)
-	
-	
 func _get_drag_data_fw(at_position: Vector2) -> Variant:
 	var item = hierarchy.get_item_at_position(at_position)
 	if item and item != hierarchy.get_root():
@@ -475,3 +411,184 @@ func _drop_data_fw(at_position: Vector2, data: Variant) -> void:
 					
 				_update_hierarchy()
 				selected_element = dragged_el
+
+
+func _on_save_button_pressed() -> void:
+	save_file_dialog.popup_centered()
+	
+func _on_file_selected(path: String) -> void:
+	if not path.ends_with(".json"):
+		path += ".json"
+		
+	# 1. Базовую структура JSON
+	var export_data = {
+		"format_version": "1.0",
+		"engine_target": "Universal",
+		"canvas": {
+			"width": 1920,
+			"height": 1080
+		},
+		"elements": []
+	}
+	
+	# 2. Проходим по всем элементам на холсте и собираем их данные
+	for el in elements:
+		if is_instance_valid(el):
+			var el_data = elements[el]
+			
+			# Словарь для конкретного элемента
+			var json_element = {
+				"id": el_data["name"],
+				"type": el_data["type"],
+				"anchor_preset": el_data["anchor_preset"],
+				"transform": {
+					"x": roundi(el_data["position"].x),
+					"y": roundi(el_data["position"].y),
+					"width": roundi(el_data["size"].x),
+					"height": roundi(el_data["size"].y),
+					"rotation": el_data["rotation"]
+				},
+				"properties": {}
+			}
+			
+			if el_data["type"] == "button" or el_data["type"] == "label":
+				json_element["properties"]["text"] = el_data["text"]
+				json_element["properties"]["font_size"] = el_data["font_size"]
+				json_element["properties"]["font_color_hex"] = "#" + el_data["font_color"].to_html()
+			elif el_data["type"] == "color_rect":
+				json_element["properties"]["color_hex"] = "#" + el_data["color"].to_html()
+				
+			export_data["elements"].append(json_element)
+			
+	# 3. Превращаем словарь в строку JSON с отступами
+	var json_string = JSON.stringify(export_data, "\t", false)
+	
+	# 4. Записываем в файл
+	var file = FileAccess.open(path, FileAccess.WRITE)
+	if file:
+		file.store_string(json_string)
+		file.close()
+		print("Проект успешно сохранен: ", path)
+		_show_success_dialog("Сохранение", "Проект успешно сохранен в JSON.")
+	else:
+		print("Ошибка при сохранении файла.")
+
+
+func _on_load_button_pressed() -> void:
+	load_file_dialog.popup_centered()
+
+
+func _on_load_file_selected(path: String) -> void:
+	var file = FileAccess.open(path, FileAccess.READ)
+	if not file:
+		_show_success_dialog("Загрузка", "Ошибка: Не удалось открыть файл.")
+		return
+		
+	var json_string = file.get_as_text()
+	file.close()
+	
+	# Парсим JSON
+	var json = JSON.new()
+	var error = json.parse(json_string)
+	if error != OK:
+		_show_success_dialog("Загрузка", "Ошибка: Некорректный формат JSON.")
+		return
+		
+	var data = json.data
+	
+	# 1. Очищаем текущий проект перед загрузкой нового
+	_on_clear_button_button_up()
+	
+	# 2. Восстанавливаем элементы
+	if data.has("elements"):
+		for el_data in data["elements"]:
+			var type = el_data["type"]
+			var new_element : Control
+			
+			if type == "button":
+				new_element = Button.new()
+			elif type == "label":
+				new_element = Label.new()
+				new_element.mouse_filter = Control.MOUSE_FILTER_PASS
+			elif type == "color_rect":
+				new_element = ColorRect.new()
+			else:
+				continue
+				
+			# Восстанавливаем скрипт и сигналы
+			new_element.set_script(load("res://scripts/DraggableElement.gd"))
+			new_element.element_clicked.connect(_on_element_selected)
+			new_element.element_dragged.connect(_on_element_dragged)
+			
+			canvas.add_child(new_element)
+			
+			new_element.name = el_data["id"]
+			
+			# Свойства
+			var props = el_data["properties"]
+			if type in ["button", "label"]:
+				new_element.text = props.get("text", "")
+				new_element.add_theme_font_size_override("font_size", props.get("font_size", 16))
+				new_element.add_theme_color_override("font_color", Color.html(props.get("font_color_hex", "#ffffff")))
+			elif type == "color_rect":
+				new_element.color = Color.html(props.get("color_hex", "#ffffff"))
+				
+			# Трансформация
+			var t = el_data["transform"]
+			new_element.size = Vector2(t["width"], t["height"])
+			
+			# Якоря (Восстанавливаем их визуально)
+			var anchor_idx = el_data["anchor_preset"]
+			if anchor_idx == 0: # Top-Left
+				new_element.anchor_left = 0.0
+				new_element.anchor_top = 0.0
+				new_element.anchor_right = 0.0
+				new_element.anchor_bottom = 0.0
+			elif anchor_idx == 1: # Center
+				new_element.anchor_left = 0.5
+				new_element.anchor_top = 0.5
+				new_element.anchor_right = 0.5
+				new_element.anchor_bottom = 0.5
+				
+				var width = new_element.size.x
+				var height = new_element.size.y
+				new_element.offset_left = -width / 2.0
+				new_element.offset_top = -height / 2.0
+				new_element.offset_right = width / 2.0
+				new_element.offset_bottom = height / 2.0
+			
+			new_element.position = Vector2(t["x"], t["y"])
+			new_element.rotation = t["rotation"]
+			
+			# Заносим в словарь (чтобы инспектор работал)
+			var dict_data : Dictionary = {
+				"type": type,
+				"name": el_data["id"],
+				"anchor_preset": anchor_idx,
+				"size": new_element.size,
+				"position": new_element.position,
+				"rotation": new_element.rotation
+			}
+			if type in ["button", "label"]:
+				dict_data["text"] = new_element.text
+				dict_data["font_size"] = props.get("font_size", 16)
+				dict_data["font_color"] = Color.html(props.get("font_color_hex", "#ffffff"))
+			elif type == "color_rect":
+				dict_data["color"] = new_element.color
+				
+			elements[new_element] = dict_data
+			
+	# 3. Обновляем иерархию и сбрасываем выделение
+	_update_hierarchy()
+	selected_element = null
+	_show_success_dialog("Загрузка", "Проект успешно загружен.")
+
+
+func _show_success_dialog(title : String, message: String) -> void:
+	var dialog = AcceptDialog.new()
+	dialog.dialog_text = message
+	dialog.title = title
+	add_child(dialog)
+	dialog.popup_centered()
+	dialog.confirmed.connect(dialog.queue_free)
+	dialog.canceled.connect(dialog.queue_free)

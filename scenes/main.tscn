@@ -62,9 +62,18 @@ text = "Добавить текст"
 layout_mode = 2
 text = "Добавить прямоугольник"
 
-[node name="SaveBtn" type="Button" parent="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar" unique_id=382321687]
+[node name="HBoxContainer" type="HBoxContainer" parent="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar" unique_id=1264631919]
 layout_mode = 2
+
+[node name="SaveBtn" type="Button" parent="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/HBoxContainer" unique_id=382321687]
+layout_mode = 2
+size_flags_horizontal = 3
 text = "Сохранить"
+
+[node name="LoadBtn" type="Button" parent="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar/HBoxContainer" unique_id=1291183319]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Загрузить"
 
 [node name="ClearBtn" type="Button" parent="MainLayout/HaT_PanelContainer/VSplitContainer/Toolbar" unique_id=841245377]
 layout_mode = 2
@@ -127,7 +136,7 @@ horizontal_alignment = 1
 [node name="DeleteButton" type="Button" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=554855537]
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Delete"
+text = "Удалить объект"
 
 [node name="PropName_HBoxContainer" type="HBoxContainer" parent="MainLayout/Inspector_PanelContainer/Inspector" unique_id=197384523]
 layout_mode = 2
@@ -259,6 +268,13 @@ color = Color(1, 1, 1, 1)
 [node name="SaveFileDialog" type="FileDialog" parent="." unique_id=1917440491]
 oversampling_override = 1.0
 title = "Save project"
+access = 2
+filters = PackedStringArray("*.json; JSON Файлы")
+
+[node name="LoadFileDialog" type="FileDialog" parent="." unique_id=1774635356]
+oversampling_override = 1.0
+title = "Open a File"
+file_mode = 0
 access = 2
 filters = PackedStringArray("*.json; JSON Файлы")
 
